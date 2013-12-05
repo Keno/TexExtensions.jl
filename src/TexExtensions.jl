@@ -7,6 +7,12 @@ import Base: writemime
 const tm = MIME("text/mathtex+latex")
 const T = MIME"text/mathtex+latex"
 
+function writemime(io,::T, x::String)
+    write(io,"\\text{")
+    write(io,x)
+    write(io,"}")
+end
+
 function writemime(io,::T, x::Rational) 
     write(io,"\\frac{")
     writemime(io,tm,x.num)
