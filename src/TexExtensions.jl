@@ -38,11 +38,7 @@ function _writefloat(io::IO, x::FloatingPoint, mode::Int32, n::Int, typed, nanst
         return
     end
     if typed && isa(x,Float16) write(io, "\\text{float16("); end
-    @Base.Grisu.grisu_ccall x mode n
-    pdigits = pointer(Base.Grisu.DIGITS)
-    neg = Base.Grisu.NEG[1]
-    len = int(Base.Grisu.LEN[1])
-    pt  = int(Base.Grisu.POINT[1])
+    len, pt, neg, pdigits = grisu_fmt(x, mode, n)
     if mode == Base.Grisu.PRECISION
         while len > 1 && Base.Grisu.DIGITS[len] == '0'
             len -= 1
@@ -87,6 +83,21 @@ function _writefloat(io::IO, x::FloatingPoint, mode::Int32, n::Int, typed, nanst
     end
     if typed && isa(x,Float16) write(io, ")\\}"); end
     nothing
+end
+
+if VERSION < v"0.4-dev"
+    eval(quote
+        function grisu_fmt(x, mode, n)
+            @Base.Grisu.grisu_ccall x mode n
+            pdigits = pointer(Base.Grisu.DIGITS)
+            neg = Base.Grisu.NEG[1]
+            len = int(Base.Grisu.LEN[1])
+            pt  = int(Base.Grisu.POINT[1])
+            len, pt, neg, pdigits
+        end
+    end)
+else
+    grisu_fmt(x, mode, n) = Base.Grisu.grisu(x, mode, n)
 end
 
 function writemime(io,::T, x::BigFloat)
