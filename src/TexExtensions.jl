@@ -1,4 +1,8 @@
+isdefined(Base, :__precompile__) && __precompile__()
+
 module TexExtensions
+
+using Compat
 
 import Base: writemime
 
@@ -7,13 +11,13 @@ import Base: writemime
 const tm = MIME("text/mathtex+latex")
 const T = MIME"text/mathtex+latex"
 
-function writemime(io,::T, x::String)
+function writemime(io,::T, x::AbstractString)
     write(io,"\\text{")
     write(io,x)
     write(io,"}")
 end
 
-function writemime(io,::T, x::Rational) 
+function writemime(io,::T, x::Rational)
     write(io,"\\frac{")
     writemime(io,tm,x.num)
     write(io,"}{")
@@ -23,14 +27,14 @@ end
 
 # This code is largely copied from grisu.jl, we really should have to copy this mutch
 
-_writefloat(io::IO, x::FloatingPoint, mode::Int32, n::Int, t) =
+_writefloat(io::IO, x::AbstractFloat, mode::Int32, n::Int, t) =
     _writefloat(io, x, mode, n, t, "NaN", "Inf")
 _writefloat(io::IO, x::Float32, mode::Int32, n::Int, t) =
     _writefloat(io, x, mode, n, t, "NaN32", "Inf32")
 _writefloat(io::IO, x::Float16, mode::Int32, n::Int, t) =
     _writefloat(io, x, mode, n, t, "NaN16", "Inf16")
 
-function _writefloat(io::IO, x::FloatingPoint, mode::Int32, n::Int, typed, nanstr, infstr)
+function _writefloat(io::IO, x::AbstractFloat, mode::Int32, n::Int, typed, nanstr, infstr)
     if isnan(x) return write(io, "\\text{", typed ? nanstr : "NaN","}"); end
     if isinf(x)
         if x < 0 write(io,"\{\}-") end
@@ -102,10 +106,10 @@ end
 
 function writemime(io,::T, x::BigFloat)
     e = Array(Culong,1)
-    str = ccall((:mpfr_get_str,:libmpfr),Ptr{Uint8},(Ptr{Uint8},Ptr{Culong},Cint,Csize_t,Ptr{Void},Int32),C_NULL,e,
+    str = ccall((:mpfr_get_str,:libmpfr),Ptr{UInt8},(Ptr{UInt8},Ptr{Culong},Cint,Csize_t,Ptr{Void},Int32),C_NULL,e,
         10,0,&x,Base.MPFR.ROUNDING_MODE[end])
     ret = bytestring(str)
-    ccall((:mpfr_free_str,:libmpfr),Void,(Ptr{Uint8},),str)
+    ccall((:mpfr_free_str,:libmpfr),Void,(Ptr{UInt8},),str)
     if ret[1] == '-'
         radix = 2
     else
