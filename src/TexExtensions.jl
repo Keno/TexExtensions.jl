@@ -1,5 +1,6 @@
 module TexExtensions
 
+using Compat
 import Base: writemime
 
 @Base.Multimedia.textmime "text/mathtex+latex"
@@ -7,7 +8,7 @@ import Base: writemime
 const tm = MIME("text/mathtex+latex")
 const T = MIME"text/mathtex+latex"
 
-function writemime(io,::T, x::String)
+function writemime(io,::T, x::AbstractString)
     write(io,"\\text{")
     write(io,x)
     write(io,"}")
@@ -23,14 +24,14 @@ end
 
 # This code is largely copied from grisu.jl, we really should have to copy this mutch
 
-_writefloat(io::IO, x::FloatingPoint, mode::Int32, n::Int, t) =
+_writefloat(io::IO, x::AbstractFloat, mode::Int32, n::Int, t) =
     _writefloat(io, x, mode, n, t, "NaN", "Inf")
 _writefloat(io::IO, x::Float32, mode::Int32, n::Int, t) =
     _writefloat(io, x, mode, n, t, "NaN32", "Inf32")
 _writefloat(io::IO, x::Float16, mode::Int32, n::Int, t) =
     _writefloat(io, x, mode, n, t, "NaN16", "Inf16")
 
-function _writefloat(io::IO, x::FloatingPoint, mode::Int32, n::Int, typed, nanstr, infstr)
+function _writefloat(io::IO, x::AbstractFloat, mode::Int32, n::Int, typed, nanstr, infstr)
     if isnan(x) return write(io, "\\text{", typed ? nanstr : "NaN","}"); end
     if isinf(x)
         if x < 0 write(io,"\{\}-") end
