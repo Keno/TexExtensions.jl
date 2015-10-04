@@ -11,13 +11,13 @@ import Base: writemime
 const tm = MIME("text/mathtex+latex")
 const T = MIME"text/mathtex+latex"
 
-function writemime(io,::T, x::AbstractString)
+function writemime(io::IO, ::T, x::AbstractString)
     write(io,"\\text{")
     write(io,x)
     write(io,"}")
 end
 
-function writemime(io,::T, x::Rational)
+function writemime(io::IO, ::T, x::Rational)
     write(io,"\\frac{")
     writemime(io,tm,x.num)
     write(io,"}{")
@@ -104,7 +104,7 @@ else
     grisu_fmt(x, mode, n) = Base.Grisu.grisu(x, mode, n)
 end
 
-function writemime(io,::T, x::BigFloat)
+function writemime(io::IO, ::T, x::BigFloat)
     e = Array(Culong,1)
     str = ccall((:mpfr_get_str,:libmpfr),Ptr{UInt8},(Ptr{UInt8},Ptr{Culong},Cint,Csize_t,Ptr{Void},Int32),C_NULL,e,
         10,0,&x,Base.MPFR.ROUNDING_MODE[end])
@@ -121,10 +121,10 @@ function writemime(io,::T, x::BigFloat)
     write(io, "\\times 10^{",dec(e[1]),"}")
 end
 
-writemime(io,::T, x::Float64) = _writefloat(io, x, Base.Grisu.SHORTEST, 0, true)
-writemime(io,::T, x::Float32) = _writefloat(io, x, Base.Grisu.SHORTEST_SINGLE, 0, true)
-writemime(io,::T, x::Float16) = _writefloat(io, x, Base.Grisu.PRECISION, 4, true)
+writemime(io::IO, ::T, x::Float64) = _writefloat(io, x, Base.Grisu.SHORTEST, 0, true)
+writemime(io::IO, ::T, x::Float32) = _writefloat(io, x, Base.Grisu.SHORTEST_SINGLE, 0, true)
+writemime(io::IO, ::T, x::Float16) = _writefloat(io, x, Base.Grisu.PRECISION, 4, true)
 
-writemime(io,::T, x::Integer) = show(io,x)
+writemime(io::IO, ::T, x::Integer) = show(io,x)
 
 end # module
