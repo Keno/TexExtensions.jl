@@ -4,24 +4,24 @@ module TexExtensions
 
 using Compat
 
-import Base: writemime
+@compat import Base.show
 
 @Base.Multimedia.textmime "text/mathtex+latex"
 
 const tm = MIME("text/mathtex+latex")
 const T = MIME"text/mathtex+latex"
 
-function writemime(io::IO, ::T, x::AbstractString)
+@compat function show(io::IO, ::T, x::AbstractString)
     write(io,"\\text{")
     write(io,x)
     write(io,"}")
 end
 
-function writemime(io::IO, ::T, x::Rational)
+@compat function show(io::IO, ::T, x::Rational)
     write(io,"\\frac{")
-    writemime(io,tm,x.num)
+    show(io,tm,x.num)
     write(io,"}{")
-    writemime(io,tm,x.den)
+    show(io,tm,x.den)
     write(io,"}")
 end
 
@@ -104,7 +104,7 @@ else
     grisu_fmt(x, mode, n) = Base.Grisu.grisu(x, mode, n)
 end
 
-function writemime(io::IO, ::T, x::BigFloat)
+function show(io::IO, ::T, x::BigFloat)
     e = Array(Culong,1)
     str = ccall((:mpfr_get_str,:libmpfr),Ptr{UInt8},(Ptr{UInt8},Ptr{Culong},Cint,Csize_t,Ptr{Void},Int32),C_NULL,e,
         10,0,&x,Base.MPFR.ROUNDING_MODE[end])
@@ -121,10 +121,10 @@ function writemime(io::IO, ::T, x::BigFloat)
     write(io, "\\times 10^{",dec(e[1]),"}")
 end
 
-writemime(io::IO, ::T, x::Float64) = _writefloat(io, x, Base.Grisu.SHORTEST, 0, true)
-writemime(io::IO, ::T, x::Float32) = _writefloat(io, x, Base.Grisu.SHORTEST_SINGLE, 0, true)
-writemime(io::IO, ::T, x::Float16) = _writefloat(io, x, Base.Grisu.PRECISION, 4, true)
+@compat show(io::IO, ::T, x::Float64) = _writefloat(io, x, Base.Grisu.SHORTEST, 0, true)
+@compat show(io::IO, ::T, x::Float32) = _writefloat(io, x, Base.Grisu.SHORTEST_SINGLE, 0, true)
+@compat show(io::IO, ::T, x::Float16) = _writefloat(io, x, Base.Grisu.PRECISION, 4, true)
 
-writemime(io::IO, ::T, x::Integer) = show(io,x)
+@compat show(io::IO, ::T, x::Integer) = show(io,x)
 
 end # module
