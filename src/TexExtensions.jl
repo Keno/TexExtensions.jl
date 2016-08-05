@@ -104,7 +104,7 @@ else
     grisu_fmt(x, mode, n) = Base.Grisu.grisu(x, mode, n)
 end
 
-function show(io::IO, ::T, x::BigFloat)
+@compat function show(io::IO, ::T, x::BigFloat)
     e = Array(Culong,1)
     str = ccall((:mpfr_get_str,:libmpfr),Ptr{UInt8},(Ptr{UInt8},Ptr{Culong},Cint,Csize_t,Ptr{Void},Int32),C_NULL,e,
         10,0,&x,Base.MPFR.ROUNDING_MODE[end])
