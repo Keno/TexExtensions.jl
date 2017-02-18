@@ -6,7 +6,10 @@ using Compat
 
 @compat import Base.show
 
-@Base.Multimedia.textmime "text/mathtex+latex"
+if VERSION < v"0.6.0-dev.870"
+    # The default should be correct already on 0.6
+    @eval @Base.Multimedia.textmime "text/mathtex+latex"
+end
 
 const tm = MIME("text/mathtex+latex")
 const T = MIME"text/mathtex+latex"
