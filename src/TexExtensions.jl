@@ -92,20 +92,7 @@ function _writefloat(io::IO, x::AbstractFloat, mode::Int32, n::Int, typed, nanst
     nothing
 end
 
-if VERSION < v"0.4-dev"
-    eval(quote
-        function grisu_fmt(x, mode, n)
-            @Base.Grisu.grisu_ccall x mode n
-            pdigits = pointer(Base.Grisu.DIGITS)
-            neg = Base.Grisu.NEG[1]
-            len = int(Base.Grisu.LEN[1])
-            pt  = int(Base.Grisu.POINT[1])
-            len, pt, neg, pdigits
-        end
-    end)
-else
-    grisu_fmt(x, mode, n) = Base.Grisu.grisu(x, mode, n)
-end
+grisu_fmt(x, mode, n) = Base.Grisu.grisu(x, mode, n)
 
 @compat function show(io::IO, ::T, x::BigFloat)
     e = Array(Culong,1)
